@@ -16,18 +16,17 @@ from tempfile import TemporaryDirectory
 from YodaDataset import YodaDataset
 import cv2
 cudnn.benchmark = True
-plt.ioff() 
+plt.ioff()
 data_transform = transforms.Compose([
         transforms.ToPILImage(),
         transforms.Resize((224, 224)),
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-    ])
+])
 
 label_transfrom = transforms.Compose([
         transforms.ToTensor(),
-    ])
-
+])
 
 #Load Training Data
 data_dir = '../datasets/Kitti8_ROIs/train'
@@ -81,8 +80,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
                 scheduler.step()
             epoch_loss = running_loss / 6000
             epoch_acc = running_corrects.double() / 6000
-
-            print('Loss: {epoch_loss:.4f} Acc: {epoch_acc:.4f}')
+            print(epoch_loss)
         print()
 
         time_elapsed = time.time() - since
@@ -90,16 +88,12 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
         print(f'Best val Acc: {best_acc:4f}')
     return model
 
-
-
-model_ft = models.resnet18(weights='IMAGENET1K_V1')
+model_ft = models.resnet18(weights=None)
 num_ftrs = model_ft.fc.in_features
 # Here the size of each output sample is set to 2.
 # Alternatively, it can be generalized to ``nn.Linear(num_ftrs, len(class_names))``.
 model_ft.fc = nn.Linear(num_ftrs, 2)
-
 model_ft = model_ft.to(device)
-
 criterion = nn.CrossEntropyLoss()
 
 # Observe that all parameters are being optimized
@@ -109,7 +103,7 @@ optimizer_ft = optim.SGD(model_ft.parameters(), lr=0.001, momentum=0.9)
 exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
 
 model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
-                       num_epochs=25)
+                       num_epochs=1)
 
 state_dict = model_ft.state_dict()
 torch.save(state_dict, "./model.pth")

@@ -1,5 +1,4 @@
 print('running ...')
-
 import torch
 import os
 import cv2
@@ -169,7 +168,6 @@ def main():
                     pt1 = (box[0][1],box[0][0])
                     pt2 = (box[1][1],box[1][0])
                     cv2.rectangle(image2, pt1, pt2, color=(0, 255, 255))
-
                 # print(ROI_IoUs[k])
                 # box = boxes[k]
                 # pt1 = (box[0][1],box[0][0])

@@ -70,6 +70,9 @@ class KittiDataset(Dataset):
                 pt2 = (int(ROI[5]), int(ROI[4]))
                 ROIs += [(pt1,pt2)]
         return ROIs
+    
+
+
 #
 # class Anchors():
 #     grid = (4, 12)

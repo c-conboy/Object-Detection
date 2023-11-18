@@ -5,8 +5,22 @@ from torch.utils.data import Dataset
 from torchvision import transforms, models
 import cv2
 
+
+
+data_transform = transforms.Compose([
+        transforms.ToPILImage(),
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+])
+
+label_transfrom = transforms.Compose([
+        transforms.ToTensor(),
+])
+
+
 class YodaDataset(Dataset):
-    def __init__(self, annotations_file, img_dir, transform=None, target_transform=None):
+    def __init__(self, annotations_file, img_dir, transform=data_transform, target_transform=None):
         labels = []
         with open(annotations_file, "r") as f:
             for line in f:
