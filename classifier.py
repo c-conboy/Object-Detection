@@ -42,6 +42,7 @@ test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=4, shuffl
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
+
 def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
     since = time.time()
 
@@ -51,7 +52,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
 
         torch.save(model.state_dict(), best_model_params_path)
         best_acc = 0.0
-
+        loss_chart = np.zeros(num_epochs)
         for epoch in range(num_epochs):
             print(f'Epoch {epoch}/{num_epochs - 1}')
             print('-' * 10)
@@ -79,11 +80,10 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
                 # statistics
                 running_loss += loss.item() * inputs.size(0)
                 scheduler.step()
-
-
             epoch_loss = running_loss / 6000
             print('epoch')
             print(epoch_loss)
+            loss_chart[loss] = epoch_loss
             state_dict = model_ft.state_dict()
             saveLocation = "./model" + str(epoch+1) + "(" + str(epoch_loss) + ")" ".pth"
             torch.save(state_dict, saveLocation)
