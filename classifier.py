@@ -60,8 +60,11 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
             running_corrects = 0
             # Iterate over data.
             for inputs, labels in train_dataloader:
+                sum = labels.sum(0)
+                if(sum[1] != 2):
+                    continue
                 inputs = inputs.to(device)
-                labels = torch.tensor(labels).to(device)
+                labels =labels.to(device)
                 # zero the parameter gradients
                 optimizer.zero_grad()
 
@@ -70,17 +73,22 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
                 with torch.set_grad_enabled(True):
                     outputs = model(inputs)
                     _, preds = torch.max(outputs, 1)
+                    print('outputs')
+                    print(outputs)
+                    print('Labels')
+                    print(labels)
                     loss = criterion(outputs, labels)
+                    print(loss)
                     loss.backward()
                     optimizer.step()
-
                 # statistics
                 running_loss += loss.item() * inputs.size(0)
-                running_corrects += torch.sum(preds == labels.data)
                 scheduler.step()
+
             epoch_loss = running_loss / 6000
-            epoch_acc = running_corrects.double() / 6000
             print(epoch_loss)
+            path = "./model" + epoch + ".pth"
+            torch.save(state_dict, path)
         print()
 
         time_elapsed = time.time() - since
@@ -88,7 +96,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
         print(f'Best val Acc: {best_acc:4f}')
     return model
 
-model_ft = models.resnet18(weights=None)
+model_ft = models.resnet18(weights="IMAGENET1K_V1")
 num_ftrs = model_ft.fc.in_features
 # Here the size of each output sample is set to 2.
 # Alternatively, it can be generalized to ``nn.Linear(num_ftrs, len(class_names))``.
@@ -99,7 +107,7 @@ criterion = nn.CrossEntropyLoss()
 # Observe that all parameters are being optimized
 optimizer_ft = optim.SGD(model_ft.parameters(), lr=0.001, momentum=0.9)
 
-# Decay LR by a factor of 0.1 every 7 epochs
+# Decay LR by a factor of 0.1 every 7 epochs 
 exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
 
 model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,

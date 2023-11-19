@@ -38,7 +38,10 @@ class YodaDataset(Dataset):
         img_name = self.img_labels[idx].split()[0]
         img_path = os.path.join(self.img_dir, img_name)
         image = cv2.imread(img_path, cv2.IMREAD_COLOR)
-        label = int(self.img_labels[idx].split()[1])
+        if(int(self.img_labels[idx].split()[1])):
+            label = torch.tensor([float(0),float(1)]) 
+        else:
+            label = torch.tensor([float(1),float(0)]) 
         if self.transform:
             image = self.transform(image)
         if self.target_transform:
