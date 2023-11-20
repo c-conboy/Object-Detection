@@ -20,12 +20,12 @@ label_transfrom = transforms.Compose([
 
 
 class YodaDataset(Dataset):
-    def __init__(self, annotations_file, img_dir, transform=data_transform, target_transform=None):
+    def __init__(self, annotations_file, img_dir, transform=data_transform, target_transform=None, imagemode = False):
         labels = []
         with open(annotations_file, "r") as f:
             for line in f:
                 labels.append(line)
-
+        self.imagemode = imagemode
         self.img_labels = labels
         self.img_dir = img_dir
         self.transform = transform
@@ -42,8 +42,9 @@ class YodaDataset(Dataset):
             label = torch.tensor([float(0),float(1)]) 
         else:
             label = torch.tensor([float(1),float(0)]) 
-        if self.transform:
-            image = self.transform(image)
+        if(not self.imagemode):
+            if self.transform:
+                image = self.transform(image)
         if self.target_transform:
             label = self.target_transform(label)
         return image, label
