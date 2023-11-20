@@ -26,12 +26,9 @@ data_transform = transforms.Compose([
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 ])
 
-data_dir = '../Kitti8_ROIs/test'
-label_file = '../Kitti8_ROIs/test/labels.txt'
+data_dir = '../datasets/Kitti8_ROIs/test'
+label_file = '../datasets/Kitti8_ROIs/test/labels.txt'
 roi_dataset = YodaDataset(label_file, data_dir, imagemode=True)
-
-#model_ft = models.resnet18(weights='IMAGENET1K_V1')
-#model_ft.eval()
 
 argParser = argparse.ArgumentParser()
 argParser.add_argument('-i', metavar='input_dir', type=str, help='input dir (./)')
@@ -51,12 +48,12 @@ dataset = KittiDataset(input_dir, training=False)
 #Select An Image
 img = dataset[input_idx][0]
 label = dataset[input_idx][1]
-
 #Split up the image into ROI
 anchors = Anchors()
 anchor_centers = anchors.calc_anchor_centers(img.shape, anchors.grid)
 ROIs, boxes = anchors.get_anchor_ROIs(img, anchor_centers, anchors.shapes)
 
+print('Displaying each ROI classified as car')
 #Pass each region of interest into model
 isCar = [0]*len(boxes)
 for k in range(len(boxes)):
@@ -65,7 +62,7 @@ for k in range(len(boxes)):
     output = model_ft(input)[0]
     value, indices = torch.max(output, 0)
     if(indices == 1):
-        #cv2.imshow('window', roi_dataset[input_idx + k][0])
+        cv2.imshow('window', roi_dataset[input_idx + k][0])
         isCar[k] = 1
         cv2.imshow('window', ROIs[k])
         cv2.waitKey(0)
@@ -85,6 +82,5 @@ for idx in range(len(ROIs)):
         cv2.rectangle(img, pt1, pt2, color=(0, 255, 255))
         cv2.imshow('boxes', img)
         cv2.waitKey(0)
-        
 AverageIOU = sum(ROI_IoUs) / len(ROI_IoUs)
 print(AverageIOU)
