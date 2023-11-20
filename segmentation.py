@@ -60,22 +60,15 @@ anchor_centers = anchors.calc_anchor_centers(img.shape, anchors.grid)
 ROIs, boxes = anchors.get_anchor_ROIs(img, anchor_centers, anchors.shapes)
 
 #Pass each region of interest into model
-class_labels = torch.empty(len(boxes), 1000)
 isCar = [0]*len(boxes)
-carLabels = [479, 705, 751, 817, 864, 609, 478, 734, 757]
 for k in range(len(boxes)):
     input = roi_dataset[input_idx + k][0].unsqueeze(0)
-    class_labels[k] = model_ft(input)[0]
-    print(class_labels[k])
-    top3 = torch.topk(class_labels[k], 3)
-    print(top3[1])
-    #cv2.imshow('window', roi_dataset[input_idx + k][0])
-    #cv2.imshow('window', ROIs[k])
-    #cv2.waitKey(0)
-    for indices in top3[1]:
-        if indices in carLabels:
-            isCar[k] = 1
-            print(indices)
+    output = model_ft(input)[0]
+    value, indices = torch.max(output, 0)
+    if((indices == 1) and (roi_dataset[input_idx + k][1][1] == 1.)):
+        #cv2.imshow('window', roi_dataset[input_idx + k][0])
+        cv2.imshow('window', ROIs[k])
+        cv2.waitKey(0)
            
 #Calculate IOU against inital la
 idx = dataset.class_label['Car']
@@ -92,5 +85,5 @@ for idx in range(len(ROIs)):
         cv2.rectangle(img, pt1, pt2, color=(0, 255, 255))
         cv2.imshow('boxes', img)
         cv2.waitKey(0)
-    
-
+        
+AverageIOU = sum(ROI_IoUs) / len(ROI_IoUs)
