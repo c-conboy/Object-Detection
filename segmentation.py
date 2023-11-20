@@ -13,13 +13,11 @@ import torch.backends.cudnn as cudnn
 from torchvision import datasets, models, transforms
 from YodaDataset import YodaDataset
 
-'''
 model_ft = models.resnet18()
 num_ftrs = model_ft.fc.in_features
 model_ft.fc = nn.Linear(num_ftrs, 2)
-model_ft.load_state_dict(torch.load('model_weights.pth'))
+model_ft.load_state_dict(torch.load('model.pth'))
 model_ft.eval()
-'''
 
 data_transform = transforms.Compose([
         transforms.ToPILImage(),
@@ -28,12 +26,12 @@ data_transform = transforms.Compose([
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 ])
 
-data_dir = '../datasets/Kitti8_ROIs/test'
-label_file = '../datasets/Kitti8_ROIs/test/labels.txt'
-roi_dataset = YodaDataset(label_file, data_dir)
+data_dir = '../Kitti8_ROIs/test'
+label_file = '../Kitti8_ROIs/test/labels.txt'
+roi_dataset = YodaDataset(label_file, data_dir, imagemode=True)
 
-model_ft = models.resnet18(weights='IMAGENET1K_V1')
-model_ft.eval()
+#model_ft = models.resnet18(weights='IMAGENET1K_V1')
+#model_ft.eval()
 
 argParser = argparse.ArgumentParser()
 argParser.add_argument('-i', metavar='input_dir', type=str, help='input dir (./)')
@@ -62,11 +60,13 @@ ROIs, boxes = anchors.get_anchor_ROIs(img, anchor_centers, anchors.shapes)
 #Pass each region of interest into model
 isCar = [0]*len(boxes)
 for k in range(len(boxes)):
-    input = roi_dataset[input_idx + k][0].unsqueeze(0)
+    #input = roi_dataset[input_idx + k][0].unsqueeze(0)
+    input = data_transform(ROIs[k]).unsqueeze(0)
     output = model_ft(input)[0]
     value, indices = torch.max(output, 0)
-    if((indices == 1) and (roi_dataset[input_idx + k][1][1] == 1.)):
+    if(indices == 1):
         #cv2.imshow('window', roi_dataset[input_idx + k][0])
+        isCar[k] = 1
         cv2.imshow('window', ROIs[k])
         cv2.waitKey(0)
            
@@ -87,3 +87,4 @@ for idx in range(len(ROIs)):
         cv2.waitKey(0)
         
 AverageIOU = sum(ROI_IoUs) / len(ROI_IoUs)
+print(AverageIOU)
