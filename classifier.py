@@ -15,6 +15,7 @@ from PIL import Image
 from tempfile import TemporaryDirectory
 from YodaDataset import YodaDataset
 import cv2
+import argparse
 cudnn.benchmark = True
 plt.ioff()
 data_transform = transforms.Compose([
@@ -28,22 +29,28 @@ label_transfrom = transforms.Compose([
         transforms.ToTensor(),
 ])
 
+#Argument parsing
+parser = argparse.ArgumentParser()
+parser.add_argument('-weights', type=str, default = 'model0(5.879209007501602).pth')
+parser.add_argument('-cuda', type=str, help='[Y/N]', default = 'Y')
+parser.add_argument('-e', type=int, default = 1)
+parser.add_argument('-b', type=int, default = 4)
+args = parser.parse_args()
+inputEpochs = args.e
+inputBatches = args.b
+
 #Load Training Data
-data_dir = '../datasets/Kitti8_ROIs/train'
-label_file = '../datasets/Kitti8_ROIs/train/labels.txt'
+#data_dir = '../datasets/Kitti8_ROIs/train'
+#label_file = '../datasets/Kitti8_ROIs/train/labels.txt'
+data_dir = '../Kitti8_ROIs/train'
+label_file = '../Kitti8_ROIs/train/labels.txt'
 train_dataset = YodaDataset(label_file, data_dir, transform=data_transform)
-train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=4, shuffle=True)
+train_dataloader = torch.utils.data.DataLoader(train_dataset, inputBatches, shuffle=True)
 
-#Load Test Data
-data_dir = '../datasets/Kitti8_ROIs/test'
-label_file = '../datasets/Kitti8_ROIs/test/labels.txt'
-test_dataset = YodaDataset(label_file, data_dir, transform=data_transform)
-test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=4, shuffle=True)
-
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda" if torch.cuda.is_available() and args.cuda == 'Y' else "cpu")
 
 
-def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
+def train_model(model, criterion, optimizer, scheduler, inputEpochs):
     since = time.time()
 
     # Create a temporary directory to save training checkpoints
@@ -52,9 +59,9 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
 
         torch.save(model.state_dict(), best_model_params_path)
         best_acc = 0.0
-        loss_chart = np.zeros(num_epochs)
-        for epoch in range(num_epochs):
-            print(f'Epoch {epoch}/{num_epochs - 1}')
+        loss_chart = np.zeros(inputEpochs)
+        for epoch in range(inputEpochs):
+            print(f'Epoch {epoch+1}/{inputEpochs}')
             print('-' * 10)
             model.train()  # Set model to training mode
             running_loss = 0.0
@@ -110,7 +117,7 @@ optimizer_ft = optim.SGD(model_ft.parameters(), lr=0.001, momentum=0.9)
 exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
 
 model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
-                       num_epochs=10)
+                       inputEpochs)
 
 state_dict = model_ft.state_dict()
 torch.save(state_dict, "./model.pth")
