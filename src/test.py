@@ -32,22 +32,22 @@ for idx in range(len(roi_dataset)):
     input = roi_dataset[idx][0].unsqueeze(0)
     output = model_ft(input)[0]
     value, indices = torch.max(output, 0)
-    #TP
-    if((indices == 1) and (roi_dataset[idx][1][1] == 1.)):
-        Tp = Tp +1
-    #FP
-    if((indices == 1) and (roi_dataset[idx][1][1] == 0.)):
-        Fp = Fp +1
+    # TP
+    if ((indices == 1) and (roi_dataset[idx][1][1] == 1.)):
+        Tp = Tp + 1
+    # FP
+    if ((indices == 1) and (roi_dataset[idx][1][1] == 0.)):
+        Fp = Fp + 1
 
-    #FN
-    if((indices == 0) and (roi_dataset[idx][1][1] == 1.)):
-        Fn = Fn +1
+    # FN
+    if ((indices == 0) and (roi_dataset[idx][1][1] == 1.)):
+        Fn = Fn + 1
 
-    #TN
-    if((indices == 0) and (roi_dataset[idx][1][1] == 0.)):
-        Tn = Tn +1
+    # TN
+    if ((indices == 0) and (roi_dataset[idx][1][1] == 0.)):
+        Tn = Tn + 1
 
-    if(roi_dataset[idx][1][indices] == 1.):
+    if (roi_dataset[idx][1][indices] == 1.):
         correct = correct + 1
 
 Accuracy = correct / len(roi_dataset)
@@ -61,6 +61,3 @@ print('Fn')
 print(Fn)
 print('Tn')
 print(Tn)
-
-        
-

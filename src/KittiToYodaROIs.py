@@ -1,23 +1,25 @@
-print('running ...')
-import torch
-import os
-import cv2
-import argparse
-from KittiDataset import KittiDataset
 from KittiAnchors import Anchors
+from KittiDataset import KittiDataset
+import argparse
+import cv2
+import os
+import torch
+print('running ...')
 
 save_ROIs = True
 max_ROIs = -1
+
 
 def strip_ROIs(class_ID, label_list):
     ROIs = []
     for i in range(len(label_list)):
         ROI = label_list[i]
         if ROI[1] == class_ID:
-            pt1 = (int(ROI[3]),int(ROI[2]))
+            pt1 = (int(ROI[3]), int(ROI[2]))
             pt2 = (int(ROI[5]), int(ROI[4]))
-            ROIs += [(pt1,pt2)]
+            ROIs += [(pt1, pt2)]
     return ROIs
+
 
 def calc_IoU(boxA, boxB):
     # print('break 209: ', boxA, boxB)
@@ -39,11 +41,13 @@ def calc_IoU(boxA, boxB):
     # return the intersection over union value
     return iou
 
+
 def calc_max_IoU(ROI, ROI_list):
     max_IoU = 0
     for i in range(len(ROI_list)):
         max_IoU = max(max_IoU, calc_IoU(ROI, ROI_list[i]))
     return max_IoU
+
 
 def main():
 
@@ -52,9 +56,12 @@ def main():
     label_file = 'labels.txt'
 
     argParser = argparse.ArgumentParser()
-    argParser.add_argument('-i', metavar='input_dir', type=str, help='input dir (./)')
-    argParser.add_argument('-o', metavar='output_dir', type=str, help='output dir (./)')
-    argParser.add_argument('-IoU', metavar='IoU_threshold', type=float, help='[0.02]')
+    argParser.add_argument('-i', metavar='input_dir',
+                           type=str, help='input dir (./)')
+    argParser.add_argument('-o', metavar='output_dir',
+                           type=str, help='output dir (./)')
+    argParser.add_argument('-IoU', metavar='IoU_threshold',
+                           type=float, help='[0.02]')
     argParser.add_argument('-d', metavar='display', type=str, help='[y/N]')
     argParser.add_argument('-m', metavar='mode', type=str, help='[train/test]')
     argParser.add_argument('-cuda', metavar='cuda', type=str, help='[y/N]')
@@ -108,7 +115,7 @@ def main():
         car_ROIs = dataset.strip_ROIs(class_ID=idx, label_list=label)
         # print(car_ROIs)
         # for idx in range(len(car_ROIs)):
-            # print(ROIs[idx])
+        # print(ROIs[idx])
 
         anchor_centers = anchors.calc_anchor_centers(image.shape, anchors.grid)
         if show_images:
@@ -131,7 +138,8 @@ def main():
         #     if key == ord('x'):
         #         break
 
-        ROIs, boxes = anchors.get_anchor_ROIs(image, anchor_centers, anchors.shapes)
+        ROIs, boxes = anchors.get_anchor_ROIs(
+            image, anchor_centers, anchors.shapes)
         # print('break 555: ', boxes)
 
         ROI_IoUs = []
@@ -140,18 +148,16 @@ def main():
 
         # print(ROI_IoUs)
 
-        
         for k in range(len(boxes)):
             filename = str(i) + '_' + str(k) + '.png'
             if save_ROIs == True:
-                cv2.imwrite(os.path.join(output_dir,filename), ROIs[k])
+                cv2.imwrite(os.path.join(output_dir, filename), ROIs[k])
             name_class = 0
             name = 'NoCar'
             if ROI_IoUs[k] >= IoU_threshold:
                 name_class = 1
                 name = 'Car'
             labels += [[filename, name_class, name]]
-
 
         if show_images:
             cv2.imshow('image', image1)
@@ -165,8 +171,8 @@ def main():
             for k in range(len(boxes)):
                 if ROI_IoUs[k] > IoU_threshold:
                     box = boxes[k]
-                    pt1 = (box[0][1],box[0][0])
-                    pt2 = (box[1][1],box[1][0])
+                    pt1 = (box[0][1], box[0][0])
+                    pt2 = (box[1][1], box[1][0])
                     cv2.rectangle(image2, pt1, pt2, color=(0, 255, 255))
                 # print(ROI_IoUs[k])
                 # box = boxes[k]
@@ -252,6 +258,3 @@ def main():
 ###################################################################
 
 main()
-
-
-

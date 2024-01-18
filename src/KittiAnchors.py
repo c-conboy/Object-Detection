@@ -6,10 +6,10 @@ class Anchors():
     # anchor_shapes = [(100,100),(100,200),(200,100),(300,75),(75,300)]
     # anchor_shapes = [(200,200),(200,400),(400,200),(300,150),(150,300)]
     # anchor_shapes = [(100,100)]
-    min_range = (100,100)
-    max_range = (376,710)
+    min_range = (100, 100)
+    max_range = (376, 710)
     # shapes = [(50,50),(100,100),(100,200),(200,100),(200,200),(200,300),(300,200)]
-    shapes = [(150,150)]
+    shapes = [(150, 150)]
 
     def calc_anchor_centers(self, image_shape, anchor_grid):
         dy = int(image_shape[0]/anchor_grid[0])
@@ -33,18 +33,21 @@ class Anchors():
 
             for k in range(len(anchor_shapes)):
                 anchor_shape = anchor_shapes[k]
-                pt1 = [int(center[0] - (anchor_shape[0]/2)), int(center[1] - (anchor_shape[1]/2))]
-                pt2 = [int(center[0] + (anchor_shape[0]/2)), int(center[1] + (anchor_shape[1]/2))]
+                pt1 = [int(center[0] - (anchor_shape[0]/2)),
+                       int(center[1] - (anchor_shape[1]/2))]
+                pt2 = [int(center[0] + (anchor_shape[0]/2)),
+                       int(center[1] + (anchor_shape[1]/2))]
 
                 # pt1 = [max(0, pt1[0]), min(pt1[1], image.shape[1])]
                 # pt2 = [max(0, pt2[0]), min(pt2[1], image.shape[1])]
                 pt1 = [max(0, pt1[0]), max(0, pt1[1])]
-                pt2 = [min(pt2[0],  image.shape[0]), min(pt2[1], image.shape[1])]
+                pt2 = [min(pt2[0],  image.shape[0]),
+                       min(pt2[1], image.shape[1])]
 
                 # print('break 777: ', pt1, pt2)
-                ROI = image[pt1[0]:pt2[0],pt1[1]:pt2[1],:]
+                ROI = image[pt1[0]:pt2[0], pt1[1]:pt2[1], :]
                 ROIs += [ROI]
-                boxes += [(pt1,pt2)]
+                boxes += [(pt1, pt2)]
 
         return ROIs, boxes
 
@@ -59,8 +62,10 @@ class Anchors():
         interArea = max(0, xB - xA + 1) * max(0, yB - yA + 1)
         # compute the area of both the prediction and ground-truth
         # rectangles
-        boxAArea = (boxA[1][1] - boxA[0][1] + 1) * (boxA[1][0] - boxA[0][0] + 1)
-        boxBArea = (boxB[1][1] - boxB[0][1] + 1) * (boxB[1][0] - boxB[0][0] + 1)
+        boxAArea = (boxA[1][1] - boxA[0][1] + 1) * \
+            (boxA[1][0] - boxA[0][0] + 1)
+        boxBArea = (boxB[1][1] - boxB[0][1] + 1) * \
+            (boxB[1][0] - boxB[0][0] + 1)
         # compute the intersection over union by taking the intersection
         # area and dividing it by the sum of prediction + ground-truth
         # areas - the interesection area

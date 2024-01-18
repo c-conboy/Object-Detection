@@ -6,13 +6,15 @@ from KittiDataset import KittiDataset
 
 display = True
 
+
 def main():
 
     print('running showKitti ...')
     # freeze_support()
 
     argParser = argparse.ArgumentParser()
-    argParser.add_argument('-i', metavar='input_dir', type=str, help='input dir (./)')
+    argParser.add_argument('-i', metavar='input_dir',
+                           type=str, help='input dir (./)')
     argParser.add_argument('-m', metavar='mode', type=str, help='[train/test]')
 
     args = argParser.parse_args()
@@ -24,7 +26,6 @@ def main():
     training = True
     if args.m == 'test':
         training = False
-
 
     min_dx = 10000
     max_dx = -1
@@ -57,7 +58,7 @@ def main():
             miny = int(label[j][3])
             maxx = int(label[j][4])
             maxy = int(label[j][5])
-            cv2.rectangle(image, (minx,miny), (maxx, maxy), (0,0,255))
+            cv2.rectangle(image, (minx, miny), (maxx, maxy), (0, 0, 255))
 
             if name_class == 2:
                 dx = maxx - minx + 1
@@ -72,7 +73,7 @@ def main():
                 if dy < min_dy:
                     min_dy = dy
 
-                ROI_shapes += [(dx,dy)]
+                ROI_shapes += [(dx, dy)]
                 ROI_dx += [dx]
                 ROI_dy += [dy]
 
@@ -84,7 +85,5 @@ def main():
 
 ###################################################################
 
+
 main()
-
-
-

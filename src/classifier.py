@@ -19,35 +19,38 @@ import argparse
 cudnn.benchmark = True
 plt.ioff()
 data_transform = transforms.Compose([
-        transforms.ToPILImage(),
-        transforms.Resize((224, 224)),
-        transforms.ToTensor(),
-        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    transforms.ToPILImage(),
+    transforms.Resize((224, 224)),
+    transforms.ToTensor(),
+    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 ])
 
 label_transfrom = transforms.Compose([
-        transforms.ToTensor(),
+    transforms.ToTensor(),
 ])
 
-#Argument parsing
+# Argument parsing
 parser = argparse.ArgumentParser()
-parser.add_argument('-weights', type=str, default = 'model0(5.879209007501602).pth')
-parser.add_argument('-cuda', type=str, help='[Y/N]', default = 'Y')
-parser.add_argument('-e', type=int, default = 1)
-parser.add_argument('-b', type=int, default = 4)
+parser.add_argument('-weights', type=str,
+                    default='model0(5.879209007501602).pth')
+parser.add_argument('-cuda', type=str, help='[Y/N]', default='Y')
+parser.add_argument('-e', type=int, default=1)
+parser.add_argument('-b', type=int, default=4)
 args = parser.parse_args()
 inputEpochs = args.e
 inputBatches = args.b
 
-#Load Training Data
-#data_dir = '../datasets/Kitti8_ROIs/train'
-#label_file = '../datasets/Kitti8_ROIs/train/labels.txt'
+# Load Training Data
+# data_dir = '../datasets/Kitti8_ROIs/train'
+# label_file = '../datasets/Kitti8_ROIs/train/labels.txt'
 data_dir = '../Kitti8_ROIs/train'
 label_file = '../Kitti8_ROIs/train/labels.txt'
 train_dataset = YodaDataset(label_file, data_dir, transform=data_transform)
-train_dataloader = torch.utils.data.DataLoader(train_dataset, inputBatches, shuffle=True)
+train_dataloader = torch.utils.data.DataLoader(
+    train_dataset, inputBatches, shuffle=True)
 
-device = torch.device("cuda" if torch.cuda.is_available() and args.cuda == 'Y' else "cpu")
+device = torch.device("cuda" if torch.cuda.is_available()
+                      and args.cuda == 'Y' else "cpu")
 
 
 def train_model(model, criterion, optimizer, scheduler, inputEpochs):
@@ -69,17 +72,17 @@ def train_model(model, criterion, optimizer, scheduler, inputEpochs):
             # Iterate over data.
             for inputs, labels in train_dataloader:
                 sum = labels.sum(0)
-                if(sum[1] != 2):
+                if (sum[1] != 2):
                     continue
                 inputs = inputs.to(device)
-                labels =labels.to(device)
+                labels = labels.to(device)
                 # zero the parameter gradients
                 optimizer.zero_grad()
 
                 # forward
                 # track history if only in train
                 with torch.set_grad_enabled(True):
-                    outputs = model(inputs)            
+                    outputs = model(inputs)
                     loss = criterion(outputs, labels)
                     loss.backward()
                     optimizer.step()
@@ -92,28 +95,32 @@ def train_model(model, criterion, optimizer, scheduler, inputEpochs):
             print(epoch_loss)
             loss_chart[loss] = epoch_loss
             state_dict = model_ft.state_dict()
-            saveLocation = "./model" + str(epoch+1) + "(" + str(epoch_loss) + ")" ".pth"
+            saveLocation = "./model" + \
+                str(epoch+1) + "(" + str(epoch_loss) + ")" ".pth"
             torch.save(state_dict, saveLocation)
         print()
 
         time_elapsed = time.time() - since
-        print(f'Training complete in {time_elapsed // 60:.0f}m {time_elapsed % 60:.0f}s')
+        print(
+            f'Training complete in {time_elapsed // 60:.0f}m {time_elapsed % 60:.0f}s')
         print(f'Best val Acc: {best_acc:4f}')
     return model
+
 
 model_ft = models.resnet18()
 num_ftrs = model_ft.fc.in_features
 # Here the size of each output sample is set to 2.
 # Alternatively, it can be generalized to ``nn.Linear(num_ftrs, len(class_names))``.
 model_ft.fc = nn.Linear(num_ftrs, 2)
-model_ft.load_state_dict(torch.load('model0(5.879209007501602).pth', map_location=torch.device('cpu')))
+model_ft.load_state_dict(torch.load(
+    'model0(5.879209007501602).pth', map_location=torch.device('cpu')))
 model_ft = model_ft.to(device)
 criterion = nn.CrossEntropyLoss()
 
 # Observe that all parameters are being optimized
 optimizer_ft = optim.SGD(model_ft.parameters(), lr=0.001, momentum=0.9)
 
-# Decay LR by a factor of 0.1 every 7 epochs 
+# Decay LR by a factor of 0.1 every 7 epochs
 exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
 
 model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,

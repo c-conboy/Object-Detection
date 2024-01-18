@@ -5,6 +5,7 @@ from torch.utils.data import Dataset
 from torchvision import transforms, models
 import cv2
 
+
 class KittiDataset(Dataset):
     def __init__(self, dir, training=True, transform=None):
         self.dir = dir
@@ -42,7 +43,8 @@ class KittiDataset(Dataset):
 
         for i in range(len(labels_string)):
             lsplit = labels_string[i].split(' ')
-            label = [lsplit[0], int(self.class_label[lsplit[0]]), float(lsplit[4]), float(lsplit[5]), float(lsplit[6]), float(lsplit[7])]
+            label = [lsplit[0], int(self.class_label[lsplit[0]]), float(
+                lsplit[4]), float(lsplit[5]), float(lsplit[6]), float(lsplit[7])]
             labels += [label]
         return image, labels
 
@@ -57,7 +59,6 @@ class KittiDataset(Dataset):
             self.num += 1
             return self.__getitem__(self.num-1)
 
-
     class_label = {'DontCare': 0, 'Misc': 1, 'Car': 2, 'Truck': 3, 'Van': 4, 'Tram': 5, 'Cyclist': 6, 'Pedestrian': 7,
                    'Person_sitting': 8}
 
@@ -66,11 +67,10 @@ class KittiDataset(Dataset):
         for i in range(len(label_list)):
             ROI = label_list[i]
             if ROI[1] == class_ID:
-                pt1 = (int(ROI[3]),int(ROI[2]))
+                pt1 = (int(ROI[3]), int(ROI[2]))
                 pt2 = (int(ROI[5]), int(ROI[4]))
-                ROIs += [(pt1,pt2)]
+                ROIs += [(pt1, pt2)]
         return ROIs
-    
 
 
 #
